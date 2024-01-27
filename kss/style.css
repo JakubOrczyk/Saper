@@ -1,0 +1,250 @@
+/*
+Saper
+
+### Kod HTML:
+
+- Istnieje `<div id="header">`, który zawiera nagłówek strony o treści "SAPER"
+
+- `<div id="game-info">` zawiera informacje związane z grą. Wewnątrz tego kontenera znajduje się `<div id="player-inputs">`, który zawiera pola do wprowadzenia danych gracza oraz wybór poziomu trudności gry.
+
+- Jest przycisk `<button id="startButton" onclick="startGame()">New game</button>`, który wywołuje funkcję startGame(), rozpoczynającą nową grę.
+
+- `<div id="board">` jest miejscem, gdzie wyświetlana jest plansza gry.
+
+- `<div id="bottomBaner">` zawiera dodatkowe informacje dotyczące gry, takie jak czas trwania gry (`<div id="timer">`) i liczbę flag (`<div id="flags">`). Oba elementy zawierają ikony oraz liczby reprezentujące odpowiednio czas i liczbę flag.
+
+- Jest kolejny przycisk `<button id="startButton" onclick="clearLocalStorage()">Clear results</button>`, który służy do czyszczenia danych z pamięci lokalnej.
+
+- `<div id="playerScores">` zawiera wyniki gracza, które mogą być aktualizowane podczas gry.
+
+
+
+Markup:
+<div id="header">SAPER</div>
+<div id="game-info">
+    <div id="player-inputs">
+        <input type="text" id="playerNameInput" placeholder="Your nick">
+        <select id="difficultySelect">
+            <option value="easy">Easy</option>
+            <option value="normal">Normal</option>
+            <option value="hard">Hard</option>
+        </select>
+        <button id="startButton" onclick="startGame()">New game</button>
+    </div>
+</div>
+<div id="board"></div>
+<div id="bottomBaner">
+    <div id="timer"><span id="timer-icon">⏰</span>0s</div>
+    <div id="flags"><span id="flags-icon">🚩</span><span id="flagCount">0</span></div>
+</div>
+<button id="startButton" onclick="clearLocalStorage()">Clear results</button>
+<div id="playerScores"></div>
+
+Style guide: 1.0
+*/
+
+/* 
+Body Styles:
+
+### Definicje stylów dla całego dokumentu.
+- background-color: Tło strony.
+- font-family: Główna czcionka.
+- justify-content, align-items: Wyrównanie elementów.
+- display: Typ wyświetlania.
+- flex-direction: Kierunek elementów flex.
+- margin: Marginesy.
+
+Styleguide 1.1
+*/
+
+/* 
+game-info:
+
+### id:game-info: Style dla paska zawierającego input, select, button.
+
+- display: układ.
+- flex-direction, align-items: wyrównanie.
+- margin-bottom: margines dolny.
+
+Styleguide 1.2
+*/
+
+/* 
+Board
+
+### board: Style dla głównej planszy. margin-top, margin-bottom: Marginesy od góry i dołu.
+
+- display: układ
+- gap: odstęp
+- padding: odstęp
+- background-color: kolor tła
+- border-radius: zaokrąglenie krawędzi
+- box-shadow: cień
+
+Styleguide 1.3
+*/
+
+/* 
+Header
+
+### header: Style dla nagłówka. font-size, color, margin-bottom: Definicje wyglądu nagłówka.
+
+- font-size: wielkość czciąki
+- margin-bottom: margines dolny
+- color: kolor tekstu
+- text-shadow: cień
+
+Styleguide 1.4
+*/
+
+
+/* 
+Media Queries:
+
+### Zestaw reguł CSS stosowanych dla różnych rozmiarów urządzeń (responsywność).
+
+- @media (max-width: 600px) Punkt przełamania i stylów dla różnych rozdzielczości ekranu.
+- Dostosowywuje wielkość czciąki i odstępy.
+
+Styleguide 1.5
+*/
+
+ body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        #header {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #333;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        #game-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        #player-inputs {
+            margin-bottom: 10px;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #player-inputs input, #player-inputs select, #player-inputs button {
+            margin-right: 10px;
+            padding: 5px;
+            font-size: 1rem;
+        }
+
+        #board {
+            display: grid;
+            gap: 2px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .cell {
+            position: relative;
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ccc;
+            text-align: center;
+            line-height: 30px;
+            cursor: pointer;
+        }
+
+        .cell:hover {
+            background-color: #eee;
+        }
+
+        .mine {
+            background-color: red;
+            color: white;
+        }
+
+        .flag {
+            position: absolute;
+            top: 0;
+            right: 0;
+            font-size: 20px;
+            line-height: 20px;
+            color: red;
+        }
+
+        #bottomBaner{
+            display: flex;
+            flex-direction: row;
+        }
+
+        #timer, #flags, #playerScores {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            color: #555;
+        }
+        
+        #timer, #flags {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        #timer{
+            border-top-right-radius: 0px;
+            border-bottom-right-radius: 0px;
+        }
+        #flags{
+            border-top-left-radius: 0px;
+            border-bottom-left-radius: 0px;
+        }
+        #timer-icon, #flags-icon {
+            margin-right: 5px;
+            font-size: 1.2rem;
+        }
+
+        #playerScores table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        #playerScores th, #playerScores td {
+            border: 1px solid #ccc;
+            padding: 5px;
+            background-color: #ddd;
+        }
+
+        @media screen and (max-width: 600px) {
+            .cell {
+                width: 20px;
+                height: 20px;
+                line-height: 20px;
+            }
+
+            #header {
+                font-size: 2rem;
+            }
+
+            #player-inputs input, #player-inputs select, #player-inputs button {
+                padding: 3px;
+                font-size: 0.8rem;
+            }
+
+            #timer, #flags, #playerScores {
+                font-size: 0.8rem;
+            }
+        }

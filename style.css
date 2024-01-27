@@ -1,0 +1,222 @@
+ /*
+# Saper
+
+## Header
+The header section for the "Saper" game.
+
+Markup:
+```html
+<div id="header">SAPER</div>
+Game Info
+Section containing game information and player inputs.
+
+Markup:
+
+<div id="game-info">
+    <div id="player-inputs">
+        <input type="text" id="playerNameInput" placeholder="Your nick">
+        <select id="difficultySelect">
+            <option value="easy">Easy</option>
+            <option value="normal">Normal</option>
+            <option value="hard">Hard</option>
+        </select>
+        <button id="startButton" onclick="startGame()">New game</button>
+    </div>
+</div>
+Player Inputs
+Panel for player inputs.
+
+Markup:
+
+<div id="player-inputs">
+    <input type="text" id="playerNameInput" placeholder="Your nick">
+    <select id="difficultySelect">
+        <option value="easy">Easy</option>
+        <option value="normal">Normal</option>
+        <option value="hard">Hard</option>
+    </select>
+    <button id="startButton" onclick="startGame()">New game</button>
+</div>
+Board
+The game board.
+
+Markup:
+
+<div id="board"></div>
+Cell
+Individual cell within the game board.
+
+Markup:
+
+<div class="cell">Content</div>
+Mine
+Special cell indicating a mine.
+
+Flag
+Flag icon indicating a flagged cell.
+
+Bottom Banner
+The bottom banner section displaying timer, flag count, and player scores.
+
+Markup:
+
+<div id="bottomBaner">
+    <div id="timer"><span id="timer-icon">⏰</span>0s</div>
+    <div id="flags"><span id="flags-icon">🚩</span><span id="flagCount">0</span></div>
+</div>
+Timer
+Timer display.
+
+Flags
+Flag count display.
+
+Player Scores
+Display of player scores.
+
+Markup:
+
+<div id="playerScores"></div>
+Responsive Design
+Styles for responsive design.
+
+Media Query: Screen width <= 600px
+*/
+ body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0; /* Kolor tła strony */
+        }
+
+        #header {
+            font-size: 3rem; /* Zwiększenie rozmiaru nagłówka */
+            margin-bottom: 20px;
+            color: #333; /* Kolor tekstu */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Dodanie cienia tekstu */
+        }
+
+        #game-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        #player-inputs {
+            margin-bottom: 10px;
+            background-color: #fff; /* Kolor tła panelu z inputem */
+            padding: 10px; /* Dodanie wypełnienia dla panelu */
+            border-radius: 8px; /* Zaokrąglenie rogów panelu */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Dodanie cienia panelu */
+        }
+
+        #player-inputs input, #player-inputs select, #player-inputs button {
+            margin-right: 10px;
+            padding: 5px;
+            font-size: 1rem;
+        }
+
+        #board {
+            display: grid;
+            gap: 2px;
+            padding: 10px;
+            background-color: #fff; /* Kolor tła planszy */
+            border-radius: 8px; /* Zaokrąglenie rogów planszy */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Dodanie cienia planszy */
+        }
+
+        .cell {
+            position: relative;
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ccc;
+            text-align: center;
+            line-height: 30px;
+            cursor: pointer;
+        }
+
+        .cell:hover {
+            background-color: #eee;
+        }
+
+        .mine {
+            background-color: red;
+            color: white;
+        }
+
+        .flag {
+            position: absolute;
+            top: 0;
+            right: 0;
+            font-size: 20px;
+            line-height: 20px;
+            color: red;
+        }
+
+        #bottomBaner{
+            display: flex;
+            flex-direction: row;
+        }
+
+        #timer, #flags, #playerScores {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            color: #555; /* Kolor tekstu dla czasu i wyników */
+        }
+        
+        #timer, #flags {
+            display: flex;
+            align-items: center;
+            padding: 10px; /* Dodanie wypełnienia dla timera */
+            background-color: #fff; /* Kolor tła timera */
+            border-radius: 8px; /* Zaokrąglenie rogów timera */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Dodanie cienia timera */
+        }
+        
+        #timer{
+            border-top-right-radius: 0px;
+            border-bottom-right-radius: 0px;
+        }
+        #flags{
+            border-top-left-radius: 0px;
+            border-bottom-left-radius: 0px;
+        }
+        #timer-icon, #flags-icon {
+            margin-right: 5px;
+            font-size: 1.2rem;
+        }
+
+        #playerScores table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        #playerScores th, #playerScores td {
+            border: 1px solid #ccc;
+            padding: 5px;
+            background-color: #ddd; /* Kolor tła komórek tabeli */
+        }
+
+        @media screen and (max-width: 600px) {
+            .cell {
+                width: 20px;
+                height: 20px;
+                line-height: 20px;
+            }
+
+            #header {
+                font-size: 2rem;
+            }
+
+            #player-inputs input, #player-inputs select, #player-inputs button {
+                padding: 3px;
+                font-size: 0.8rem;
+            }
+
+            #timer, #flags, #playerScores {
+                font-size: 0.8rem;
+            }
+        }

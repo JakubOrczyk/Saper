@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: script.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: script.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @global
+ * @type {boolean[]} 
+ */
+let mines;
+
+/**
+ * Zmienna śledząca stan rozpoczęcia gry.
+ * @type {boolean}
+ */
+let gameStarted = false;
+
+/**
+ * @global
+ * @type {number} 
+ */
+let revealedCells;
+
+/**
+ * @global
+ * @type {number} 
+ */
+let remainingCells;
+
+/**
+ * @global
+ * @type {number} 
+ */
+let startTime;
+
+/**
+ * @global
+ * @type {number} 
+ */
+let timerInterval;
+
+/**
+ * @global
+ * @type {HTMLElement} 
+ */
+const board = document.getElementById("board");
+
+/**
+ * @global
+ * @type {HTMLSelectElement} 
+ */
+const difficultySelect = document.getElementById("difficultySelect");
+
+/**
+ * @global
+ * @type {HTMLInputElement} 
+ */
+const playerNameInput = document.getElementById("playerNameInput");
+
+/**
+ * @global
+ * @type {HTMLElement} 
+ */
+const timerDisplay = document.getElementById("timer");
+
+/**
+ * @global
+ * @type {HTMLElement} 
+ */
+const playerScoresDisplay = document.getElementById("playerScores");
+
+/**
+ * Funkcja tworząca komórkę planszy.
+ * @param {number} index - Indeks komórki
+ * @function
+ */
+function createCell(index) {
+    const cell = document.createElement("div");
+    cell.classList.add("cell");
+    cell.dataset.index = index;
+    cell.addEventListener("click", handleCellClick);
+    board.appendChild(cell);
+}
+
+/**
+ * Obsługa kliknięcia na komórkę planszy.
+ * @param {Event} event - Zdarzenie kliknięcia
+ * @function
+ */
+function handleCellClick(event) {
+    const clickedCell = event.target;
+    const index = parseInt(clickedCell.dataset.index);
+
+    if (mines[index]) {
+        revealMines();
+        alert("Game over!");
+        stopTimer();
+        savePlayerScore(false);
+    } else {
+        revealCell(index);
+        checkWinCondition();
+    }
+}
+
+/**
+ * Sprawdza warunek wygranej gry.
+ * @function
+ */
+function checkWinCondition() {
+    if (remainingCells === 0) {
+        alert("Congratulations! You won!");
+        stopTimer();
+        savePlayerScore(true);
+    }
+}
+
+/**
+ * Odsłania komórkę na planszy.
+ * @param {number} index - Indeks komórki
+ * @function
+ */
+function revealCell(index) {
+    const clickedCell = document.querySelector(`.cell[data-index="${index}"]`);
+    const mineCount = countAdjacentMines(index);
+
+    if (!clickedCell.classList.contains("revealed")) {
+        clickedCell.textContent = mineCount;
+        clickedCell.classList.add("revealed");
+        revealedCells++;
+        remainingCells--;
+
+        if (mineCount === 0) {
+            const neighbors = getNeighbors(index);
+            neighbors.forEach(neighbor => revealCell(neighbor));
+        }
+    }
+}
+
+/**
+ * Liczy liczbę sąsiadujących min.
+ * @param {number} index - Indeks komórki
+ * @returns {number} Liczba sąsiednich min
+ * @function
+ */
+function countAdjacentMines(index) {
+    const neighbors = getNeighbors(index);
+    return neighbors.filter(neighbor => mines[neighbor]).length;
+}
+
+/**
+ * Zwraca indeksy sąsiadujących komórek.
+ * @param {number} index - Indeks komórki
+ * @returns {number[]} Indeksy sąsiadujących komórek
+ * @function
+ */
+function getNeighbors(index) {
+    const row = Math.floor(index / Math.sqrt(mines.length));
+    const col = index % Math.sqrt(mines.length);
+    const neighbors = [];
+
+    for (let i = row - 1; i &lt;= row + 1; i++) {
+        for (let j = col - 1; j &lt;= col + 1; j++) {
+            if (i >= 0 &amp;&amp; i &lt; Math.sqrt(mines.length) &amp;&amp; j >= 0 &amp;&amp; j &lt; Math.sqrt(mines.length) &amp;&amp; !(i === row &amp;&amp; j === col)) {
+                neighbors.push(i * Math.sqrt(mines.length) + j);
+            }
+        }
+    }
+
+    return neighbors;
+}
+
+/**
+ * Odsłania wszystkie miny na planszy.
+ * @function
+ */
+function revealMines() {
+    const cells = document.querySelectorAll(".cell");
+    cells.forEach(cell => {
+        const index = parseInt(cell.dataset.index);
+        if (mines[index]) {
+            cell.textContent = "💣";
+            cell.classList.add("mine");
+        }
+    });
+}
+
+/**
+ * Inicjalizuje planszę gry.
+ * @param {number} boardSize - Rozmiar planszy
+ * @function
+ */
+function initializeBoard(boardSize) {
+    board.style.gridTemplateColumns = `repeat(${boardSize}, 30px)`;
+
+    for (let i = 0; i &lt; boardSize * boardSize; i++) {
+        createCell(i);
+    }
+}
+
+/**
+ * Rozpoczyna grę.
+ * @function
+ */
+function startGame() {
+    gameStarted = true;
+    const playerName = playerNameInput.value.trim();
+    if (!playerName) {
+        alert("Please enter your name!");
+        return;
+    }
+
+    const difficulty = difficultySelect.value;
+    let boardSize;
+    let mineCount;
+
+    switch (difficulty) {
+        case "easy":
+            boardSize = 8;
+            mineCount = 10;
+            break;
+        case "normal":
+            boardSize = 10;
+            mineCount = 15;
+            break;
+        case "hard":
+            boardSize = 12;
+            mineCount = 20;
+            break;
+        default:
+            boardSize = 8;
+            mineCount = 10;
+    }
+
+    playerNameInput.disabled = true;
+    mines = generateMines(boardSize, mineCount);
+    revealedCells = 0;
+    remainingCells = boardSize * boardSize - mineCount;
+    startTime = Date.now();
+    timer();
+    board.innerHTML = "";
+    initializeBoard(boardSize);
+    flagCount = mineCount;
+    updateFlagCount();
+}
+
+/**
+ * Generuje miny na planszy.
+ * @param {number} boardSize - Rozmiar planszy
+ * @param {number} mineCount - Liczba min
+ * @returns {boolean[]} Tablica reprezentująca miny na planszy
+ * @function
+ */
+function generateMines(boardSize, mineCount) {
+    const mineArray = Array(boardSize * boardSize).fill(false);
+    for (let i = 0; i &lt; mineCount; i++) {
+        let randomIndex;
+        do {
+            randomIndex = Math.floor(Math.random() * (boardSize * boardSize));
+        } while (mineArray[randomIndex]);
+        mineArray[randomIndex] = true;
+    }
+    return mineArray;
+}
+
+/**
+ * Rozpoczyna pomiar czasu gry.
+ * @function
+ */
+async function timer() {
+    updateTimer();
+    timerInterval = setInterval(updateTimer, 1000);
+}
+
+/**
+ * Zatrzymuje pomiar czasu gry.
+ * @function
+ */
+function stopTimer() {
+    clearInterval(timerInterval);
+}
+
+/**
+ * Aktualizuje czas na wyświetlaczu.
+ * @function
+ */
+function updateTimer() {
+    const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+    timerDisplay.textContent = `⏰ ${elapsedTime}s`;
+}
+
+/**
+ * Zapisuje wynik gracza.
+ * @param {boolean} hasWon - Czy gracz wygrał?
+ * @async
+ * @function
+ */
+async function savePlayerScore(hasWon) {
+    const playerName = playerNameInput.value.trim();
+    const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+    let playerScores = await getPlayerScores();
+    playerScores.push({ name: playerName, time: elapsedTime, won: hasWon });
+    localStorage.setItem("playerScores", JSON.stringify(playerScores));
+    displayPlayerScores();
+}
+
+/**
+ * Pobiera wyniki graczy z lokalnej pamięci przeglądarki.
+ * @returns {object[]} Tablica wyników graczy
+ * @async
+ * @function
+ */
+async function getPlayerScores() {
+    const playerScores = localStorage.getItem("playerScores");
+    return playerScores ? JSON.parse(playerScores) : [];
+}
+
+/**
+ * Wyświetla wyniki graczy.
+ * @async
+ * @function
+ */
+async function displayPlayerScores() {
+    const playerScores = await getPlayerScores();
+
+    playerScoresDisplay.innerHTML = "&lt;h2>Player Scores&lt;/h2>";
+    if (playerScores.length > 0) {
+        const table = document.createElement("table");
+        const headerRow = table.insertRow();
+        headerRow.innerHTML = "&lt;th>Nick&lt;/th>&lt;th>Time&lt;/th>&lt;th>Result&lt;/th>";
+
+        playerScores.forEach(score => {
+            const row = table.insertRow();
+            row.innerHTML = `&lt;td>${score.name}&lt;/td>&lt;td>${score.time}&lt;/td>&lt;td>${score.won ? "Won" : "Lost"}&lt;/td>`;
+        });
+
+        playerScoresDisplay.appendChild(table);
+    } else {
+        playerScoresDisplay.innerHTML = "&lt;p>No player scores yet.&lt;/p>";
+    }
+}
+
+/**
+ * Obsługuje zdarzenie kontekstowe dla planszy (kliknięcie prawym przyciskiem myszy).
+ * Wstawia lub usuwa flagę z komórki, w zależności od jej aktualnego stanu.
+ * Zmniejsza licznik dostępnych flag, gdy flaga jest wstawiana, oraz zwiększa go, gdy flaga jest usuwana.
+ * @param {Event} event - Zdarzenie kontekstowe
+ * @function
+ */
+function handleContextMenu(event) {
+    event.preventDefault();
+    
+    const clickedCell = event.target;
+    const index = parseInt(clickedCell.dataset.index);
+
+    if (!clickedCell.classList.contains("revealed")) {
+        if (clickedCell.textContent === "") {
+            if (flagCount > 0) {
+                clickedCell.textContent = "🚩";
+                flagCount--;
+                updateFlagCount();
+            }
+        } else if (clickedCell.textContent === "🚩") {
+            clickedCell.textContent = "";
+            flagCount++;
+            updateFlagCount();
+        }
+    }
+}
+/**
+ * Aktualizuje wyświetlacz liczby flag.
+ * @function
+ */
+function updateFlagCount() {
+    document.getElementById("flagCount").textContent = flagCount;
+}
+/**
+ * Dodaje obsługę zdarzenia kontekstowego (kliknięcie prawym przyciskiem myszy) dla planszy.
+ * Wywołuje funkcję `handleContextMenu` w odpowiedzi na to zdarzenie.
+ * @event
+ */
+board.addEventListener("contextmenu", handleContextMenu);
+
+/**
+ * Funkcja wywoływana po załadowaniu zawartości DOM.
+ * Inicjalizuje planszę gry i wyświetla wyniki graczy.
+ * Dodaje również obsługę zdarzenia kliknięcia planszy.
+ * @event
+ */
+document.addEventListener("DOMContentLoaded", function() {
+
+    initializeBoard(8);
+    displayPlayerScores();
+    board.addEventListener('click', function() {
+        if (!gameStarted) {
+            alert('Start the game');
+        }
+    });
+    
+});
+
+/**
+ * Czyści wszystkie dane przechowywane w pamięci lokalnej przeglądarki i aktualizuje wyświetlane wyniki graczy.
+ * @function
+ */
+function clearLocalStorage() {
+    localStorage.clear();
+    displayPlayerScores();
+}
+
+
+
+displayPlayerScores();
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#board">board</a></li><li><a href="global.html#checkWinCondition">checkWinCondition</a></li><li><a href="global.html#clearLocalStorage">clearLocalStorage</a></li><li><a href="global.html#countAdjacentMines">countAdjacentMines</a></li><li><a href="global.html#createCell">createCell</a></li><li><a href="global.html#difficultySelect">difficultySelect</a></li><li><a href="global.html#displayPlayerScores">displayPlayerScores</a></li><li><a href="global.html#gameStarted">gameStarted</a></li><li><a href="global.html#generateMines">generateMines</a></li><li><a href="global.html#getNeighbors">getNeighbors</a></li><li><a href="global.html#getPlayerScores">getPlayerScores</a></li><li><a href="global.html#handleCellClick">handleCellClick</a></li><li><a href="global.html#handleContextMenu">handleContextMenu</a></li><li><a href="global.html#initializeBoard">initializeBoard</a></li><li><a href="global.html#mines">mines</a></li><li><a href="global.html#playerNameInput">playerNameInput</a></li><li><a href="global.html#playerScoresDisplay">playerScoresDisplay</a></li><li><a href="global.html#remainingCells">remainingCells</a></li><li><a href="global.html#revealCell">revealCell</a></li><li><a href="global.html#revealMines">revealMines</a></li><li><a href="global.html#revealedCells">revealedCells</a></li><li><a href="global.html#savePlayerScore">savePlayerScore</a></li><li><a href="global.html#startGame">startGame</a></li><li><a href="global.html#startTime">startTime</a></li><li><a href="global.html#stopTimer">stopTimer</a></li><li><a href="global.html#timer">timer</a></li><li><a href="global.html#timerDisplay">timerDisplay</a></li><li><a href="global.html#timerInterval">timerInterval</a></li><li><a href="global.html#updateFlagCount">updateFlagCount</a></li><li><a href="global.html#updateTimer">updateTimer</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Sat Jan 27 2024 00:05:59 GMT+0100 (czas środkowoeuropejski standardowy)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
