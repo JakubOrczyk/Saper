@@ -27,6 +27,7 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
+ * Zmienna globalna reprezentująca stan min na planszy.
  * @global
  * @type {boolean[]} 
  */
@@ -39,54 +40,63 @@ let mines;
 let gameStarted = false;
 
 /**
+ * Zmienna globalna przechowująca liczbę odsłoniętych komórek na planszy.
  * @global
  * @type {number} 
  */
 let revealedCells;
 
 /**
+ * Zmienna globalna przechowująca liczbę pozostałych do odsłonięcia komórek na planszy.
  * @global
  * @type {number} 
  */
 let remainingCells;
 
 /**
+ * Zmienna globalna przechowująca czas rozpoczęcia gry.
  * @global
  * @type {number} 
  */
 let startTime;
 
 /**
+ * Zmienna globalna przechowująca identyfikator interwału dla licznika czasu gry.
  * @global
  * @type {number} 
  */
 let timerInterval;
 
 /**
+ * Element HTML reprezentujący planszę gry.
  * @global
  * @type {HTMLElement} 
  */
 const board = document.getElementById("board");
 
 /**
+ * Element HTML reprezentujący pole wyboru poziomu trudności.
  * @global
  * @type {HTMLSelectElement} 
  */
 const difficultySelect = document.getElementById("difficultySelect");
 
 /**
+ * Element HTML reprezentujący pole wprowadzania nazwy gracza.
  * @global
  * @type {HTMLInputElement} 
  */
 const playerNameInput = document.getElementById("playerNameInput");
 
 /**
+ * Element HTML reprezentujący wyświetlacz czasu gry.
  * @global
  * @type {HTMLElement} 
  */
 const timerDisplay = document.getElementById("timer");
 
 /**
+ * Element HTML reprezentujący wyświetlacz wyników graczy.
  * @global
  * @type {HTMLElement} 
  */
@@ -94,6 +104,11 @@ const playerScoresDisplay = document.getElementById("playerScores");
 
 /**
  * Funkcja tworząca komórkę planszy.
+ * Tworzy nowy element div reprezentujący komórkę planszy.
+ * Dodaje klasę CSS "cell" do komórki.
+ * Ustawia atrybut dataset z indeksem komórki.
+ * Dodaje zdarzenie kliknięcia komórki.
+ * Dodaje utworzoną komórkę do elementu planszy (board).
  * @param {number} index - Indeks komórki
  * @function
  */
@@ -107,6 +122,16 @@ function createCell(index) {
 
 /**
  * Obsługa kliknięcia na komórkę planszy.
+ * Pobiera klikniętą komórkę planszy i indeks komórki z atrybutu dataset.
+ * Sprawdza, czy komórka zawiera minę.
+ * Jeśli tak to:
+ * Wywołuje funkcję ujawniającą wszystkie miny.
+ * Wyświetla komunikat o przegranej grze.
+ * Zatrzymuje licznik czasu.
+ * Zapisuje wynik gracza jako przegraną.
+ * W przeciwnym razie:
+ * Ujawnia klikniętą komórkę.
+ * Sprawdza warunek wygranej.
  * @param {Event} event - Zdarzenie kliknięcia
  * @function
  */
@@ -127,6 +152,11 @@ function handleCellClick(event) {
 
 /**
  * Sprawdza warunek wygranej gry.
+ * Sprawdza, czy wszystkie komórki zostały odkryte.
+ * Jeśli tak to:
+ * Wyświetla komunikat o wygranej grze.
+ * Zatrzymuje licznik czasu.
+ * Zapisuje wynik gracza jako wygraną.
  * @function
  */
 function checkWinCondition() {
@@ -139,6 +169,15 @@ function checkWinCondition() {
 
 /**
  * Odsłania komórkę na planszy.
+ * Pobiera klikniętą komórkę planszy na podstawie jej indeksu.
+ * Oblicza liczbę min sąsiadujących z komórką przez wywołanie funkcji countAdjacentMines.
+ * Sprawdza, czy komórka nie została jeszcze odsłonięta.
+ * Jeśli tak to:
+ * Ustawia tekst komórki na liczbę sąsiadujących min.
+ * Dodaje klasę "revealed" do odsłoniętej komórki.
+ * Zwiększa licznik odsłoniętych komórek.
+ * Zmniejsza licznik pozostałych do odsłonięcia komórek.
+ * Jeśli komórka nie ma sąsiadujących min, odsłania sąsiadujące komórki.
  * @param {number} index - Indeks komórki
  * @function
  */
@@ -161,6 +200,8 @@ function revealCell(index) {
 
 /**
  * Liczy liczbę sąsiadujących min.
+ * Pobiera sąsiadujące indeksy komórek.
+ * Filtruje sąsiadujące komórki, aby uzyskać tylko te, które zawierają miny,a następnie zwraca ich liczbę.
  * @param {number} index - Indeks komórki
  * @returns {number} Liczba sąsiednich min
  * @function
@@ -172,6 +213,14 @@ function countAdjacentMines(index) {
 
 /**
  * Zwraca indeksy sąsiadujących komórek.
+ * Oblicza numer wiersza na podstawie indeksu komórki.
+ * Oblicza numer kolumny na podstawie indeksu komórki.
+ * Tworzy pustą tablicę na indeksy sąsiadujących komórek.
+ * Iteruje przez sąsiadujące wiersze.
+ * Iteruje przez sąsiadujące kolumny.
+ * Sprawdza, czy sąsiadująca komórka mieści się w obszarze planszy i czy nie jest to ta sama komórka (indeks równy indeksowi komórki).
+ * Oblicza indeks sąsiadującej komórki i dodaje go do tablicy neighbors.
+ * Zwraca tablicę indeksów sąsiadujących komórek.
  * @param {number} index - Indeks komórki
  * @returns {number[]} Indeksy sąsiadujących komórek
  * @function
@@ -194,6 +243,13 @@ function getNeighbors(index) {
 
 /**
  * Odsłania wszystkie miny na planszy.
+ * Pobiera wszystkie komórki planszy.
+ * Iteruje przez każdą komórkę.
+ * Pobiera indeks komórki.
+ * Sprawdza, czy komórka zawiera minę.
+ * Jeśli tak to:
+ * Ustawia tekst komórki na symbol bomby.
+ * Dodaje klasę "mine" do komórki, aby wskazać, że zawiera minę.
  * @function
  */
 function revealMines() {
@@ -209,6 +265,8 @@ function revealMines() {
 
 /**
  * Inicjalizuje planszę gry.
+ * Ustawia styl kolumn planszy za pomocą CSS Grid.
+ * Tworzy komórki planszy na podstawie rozmiaru planszy.
  * @param {number} boardSize - Rozmiar planszy
  * @function
  */
@@ -222,6 +280,21 @@ function initializeBoard(boardSize) {
 
 /**
  * Rozpoczyna grę.
+ * Ustawia flagę informującą, że gra została rozpoczęta.
+ * Pobiera nazwę gracza z pola wejściowego i usuwa białe znaki z początku i końca.
+ * Sprawdza, czy nazwa gracza została podana.
+ * Jeśli nie to:
+ * Wyświetla alert, jeśli nazwa gracza nie została podana, i przerywa dalsze wykonywanie funkcji.
+ * Pobiera wybrany poziom trudności.
+ * Ustala rozmiar planszy i liczbę min w zależności od wybranego poziomu trudności.
+ * Wyłącza pole wprowadzania nazwy gracza.
+ * Generuje miny na planszy.
+ * Resetuje licznik odsłoniętych komórek.
+ * Oblicza liczbę pozostałych do odsłonięcia komórek.
+ * Rozpoczyna liczenie czasu gry.
+ * Czyści planszę z komórek.
+ * Inicjalizuje planszę gry na podstawie ustalonego rozmiaru.
+ * Ustawia liczbę dostępnych flag na początkową liczbę min.
  * @function
  */
 function startGame() {
@@ -268,6 +341,11 @@ function startGame() {
 
 /**
  * Generuje miny na planszy.
+ * Tworzy tablicę o rozmiarze równym liczbie komórek planszy i wypełnia ją wartościami false.
+ * Losuje pozycje min na planszy.
+ * Wybiera losowy indeks, który jeszcze nie zawiera miny.
+ * Ustawia minę na wylosowanej pozycji.
+ * Zwraca tablicę reprezentującą miny na planszy.
  * @param {number} boardSize - Rozmiar planszy
  * @param {number} mineCount - Liczba min
  * @returns {boolean[]} Tablica reprezentująca miny na planszy
@@ -287,6 +365,8 @@ function generateMines(boardSize, mineCount) {
 
 /**
  * Rozpoczyna pomiar czasu gry.
+ * Aktualizuje licznik czasu.
+ * Ustawia interwał odświeżania licznika czasu co 1000 milisekund (1 sekunda).
  * @function
  */
 async function timer() {
@@ -296,6 +376,7 @@ async function timer() {
 
 /**
  * Zatrzymuje pomiar czasu gry.
+ * Usuwa interwał odświeżania licznika czasu.
  * @function
  */
 function stopTimer() {
@@ -304,6 +385,8 @@ function stopTimer() {
 
 /**
  * Aktualizuje czas na wyświetlaczu.
+ * Oblicza upływający czas od rozpoczęcia gry w sekundach.
+ * Aktualizuje tekst wyświetlacza czasu gry.
  * @function
  */
 function updateTimer() {
@@ -312,7 +395,13 @@ function updateTimer() {
 }
 
 /**
- * Zapisuje wynik gracza.
+ *  Zapisuje wynik gracza w pamięci lokalnej przeglądarki.
+ *  Pobiera nazwę gracza z pola wejściowego na stronie i usuwa białe znaki z początku i końca.
+ *  Oblicza czas, jaki upłynął od rozpoczęcia gry w sekundach.
+ *  Pobiera bieżącą listę wyników graczy z pamięci lokalnej.
+ *  Dodaje nowy wynik gracza do listy.
+ *  Zapisuje zaktualizowaną listę wyników graczy w pamięci lokalnej.
+ *  Aktualizuje wyświetlanie wyników graczy na stronie.
  * @param {boolean} hasWon - Czy gracz wygrał?
  * @async
  * @function
@@ -328,6 +417,9 @@ async function savePlayerScore(hasWon) {
 
 /**
  * Pobiera wyniki graczy z lokalnej pamięci przeglądarki.
+ * Pobiera zapisane wyniki graczy z lokalnej pamięci przeglądarki.
+ * Jeśli są zapisane wyniki graczy, parsuje je z formatu JSON do tablicy obiektów.
+ * W przeciwnym razie, zwraca pustą tablicę.
  * @returns {object[]} Tablica wyników graczy
  * @async
  * @function
@@ -338,9 +430,20 @@ async function getPlayerScores() {
 }
 
 /**
- * Wyświetla wyniki graczy.
+ * Wyświetla wyniki graczy na stronie internetowej.
+ * Pobiera wyniki graczy z pamięci lokalnej przeglądarki.
+ * Czyści zawartość elementu wyświetlającego wyniki graczy.
+ * Sprawdza, czy istnieją wyniki graczy.
+ * Jeśli tak to:
+ * Tworzy tabelę HTML do wyświetlenia wyników graczy.
+ * Tworzy wiersz nagłówka tabeli.
+ * Wypełnia tabelę wynikami graczy.
+ * Dodaje tabelę do elementu wyświetlającego wyniki graczy.
+ * W przeciwnym razie:
+ * Wyświetla komunikat, gdy brak wyników graczy.
  * @async
  * @function
+ * @returns {Promise&lt;void>} Obietnica zakończenia wyświetlania wyników graczy.
  */
 async function displayPlayerScores() {
     const playerScores = await getPlayerScores();
@@ -391,6 +494,7 @@ function handleContextMenu(event) {
 }
 /**
  * Aktualizuje wyświetlacz liczby flag.
+ * Aktualizuje tekst wyświetlacza liczby flag na stronie internetowej.
  * @function
  */
 function updateFlagCount() {
@@ -449,7 +553,7 @@ displayPlayerScores();
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Sat Jan 27 2024 00:05:59 GMT+0100 (czas środkowoeuropejski standardowy)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Tue Jan 30 2024 19:16:05 GMT+0100 (czas środkowoeuropejski standardowy)
 </footer>
 
 <script> prettyPrint(); </script>
